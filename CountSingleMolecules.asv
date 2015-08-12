@@ -104,7 +104,10 @@ for k = 1:length(fileList)
     histMatrix(:, k+1) = histc(CountNumbers{k,3}, histVector');
 end
 
-fprintf(fID, '%s%s\r\n', sprintf('%s\t', 'Brightness'), strjoin(CountNumbers(:,1)', '\t'));
+formatString = repmat('%s\t', 1, length(fileList)-1);
+formatString = strcat(formatString, '%s\r\n');
+
+fprintf(fID, formatString, {'Brightness' CountNumbers{:,1}});
 
 formatString = repmat('%.3f\t', 1, length(fileList)-1);
 formatString = strcat(formatString, '%.3f\r\n');
