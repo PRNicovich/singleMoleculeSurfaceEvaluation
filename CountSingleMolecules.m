@@ -12,6 +12,7 @@ psfWidth = 1.1; %in pixels
 WindowDiameter = 9; % Window size for determining the centroid position
 
 BrightnessHistogramBins = 100; % Number of bins to use in the brightness histogram
+MaxHistogramBrightness = 10000; % Value for largest bin in histogram.  Set to 'Inf' to be auto-detecting.
 
 %%%%%%%%%%%%%%%%%%%%%%%
 
@@ -96,17 +97,23 @@ fprintf(fID, '# Histogram Bins : %.f\r\n', BrightnessHistogramBins);
 fprintf(fID, '#############################\r\n');
 
 % Make brightness data matrix
-histVector = linspace(min(cell2mat(cellfun(@min, CountNumbers(:,3), 'UniformOutput', false))), ...
-    max(cell2mat(cellfun(@max, CountNumbers(:,3), 'UniformOutput', false))), BrightnessHistogramBins);
+if MaxHistogramBrightness < Inf
+    histVector = linspace(0, ...
+        MaxHistogramBrightness, BrightnessHistogramBins);
+else 
+    histVector = linspace(0, ...
+        max(cell2mat(cellfun(@max, CountNumbers(:,3), 'UniformOutput', false))), BrightnessHistogramBins);
+end
+
 histMatrix = zeros(numel(histVector), length(fileList)+1);
 histMatrix(:,1) = histVector;
 for k = 1:length(fileList)
     histMatrix(:, k+1) = histc(CountNumbers{k,3}, histVector');
 end
 
-fprintf(fID, '%s%s\r\n', sprintf('%s\t', 'Brightness'), strjoin(CountNumbers(:,1)', '\t'));
+fprintf(fID, '%s\t%s\r\n', 'Brightness', strjoin(CountNumbers(:,1)', '\t'));
 
-formatString = repmat('%.3f\t', 1, length(fileList)-1);
+formatString = repmat('%.3f\t', 1, length(fileList));
 formatString = strcat(formatString, '%.3f\r\n');
 
 for k = 1:size(histMatrix, 1)
