@@ -1,3 +1,5 @@
+
+% folderPath and outputFolder must be different paths!
 folderPath = 'M:\images\zeisspalm\Manchen Zhao\15_05_27';
 
 outputFolder = 'D:\MATLAB\CountSingleMolecules\29052015';
@@ -16,19 +18,47 @@ MaxHistogramBrightness = 10000; % Value for largest bin in histogram.  Set to 'I
 
 %%%%%%%%%%%%%%%%%%%%%%%
 
+if strcmp(folderPath, outputFolder)
+    error('folderPath and outputFolder must be different paths.');
+end
+
 fileList = dir(strcat(folderPath, '\*.czi'));
+fileList = [fileList; dir(strcat(folderPath, '\*.tif'))];
+fileList = [fileList; dir(strcat(folderPath, '\*.tiff'))];
 
 CountNumbers = cell(length(fileList), 5);
 
 for fileNumber = 1:length(fileList)
 
 
-
-    %%%%%%%%%%%%%
-    % Load .czi file
-
-    imgData = CZIImport(fullfile(folderPath, fileList(fileNumber).name));
+    % Check if file is one of permitted formats
+    switch lower(fileList(fileNumber).name((end-2):end));
     
+        case 'czi';
+    
+            %%%%%%%%%%%%%
+            % Load .czi file   
+
+            imgData = CZIImport(fullfile(folderPath, fileList(fileNumber).name));
+    
+        case 'tif'
+            
+            %%%%%%%%%%%%%
+            % Load .tif file 
+            
+            imgData = imread(fullfile(folderPath, fileList(fileNumber).name));
+            
+        case 'tiff'
+            
+            %%%%%%%%%%%%%
+            % Load .tif file 
+            
+            imgData = imread(fullfile(folderPath, fileList(fileNumber).name));
+            
+        otherwise 
+            fprintf(1, 'File %s is in unsupported format.\n', fileList(fileNumber).name);
+            
+    end
     img = bpass(imgData, bpassLowHigh(1), bpassLowHigh(2));
     pksFound = pkfnd(img, minPkfndIntensity, psfWidth);
     centroidsFound = cntrd(img, pksFound, WindowDiameter, 0);
